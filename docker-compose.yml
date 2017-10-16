@@ -1,0 +1,39 @@
+version: "2"
+
+services:
+    rails:
+        build:
+            context: ./railsBuild
+            args:
+                - APP_HOME=myapp
+                - USER_ID=$USER_ID
+        volumes:
+            - ./railsBuild/registroDeudas:/home/developer/myapp
+        user: "$USER_ID"
+        ports:
+            - 3000:3000
+        links:
+            - mongodb
+        depends_on:
+            - mongodb
+        command: sh -c 'bundle install ;rails server --port 3000 --binding 0.0.0.0'
+        #command: rails new /home/developer/myapp --api -T
+    mongoexpress:
+        image: mongo-express
+        environment:
+            - ME_CONFIG_MONGODB_SERVER=mongodb
+        ports:
+            - 8081:8081
+        links:
+            - mongodb
+        depends_on:
+            - mongodb
+    mongodb:
+        image: mongo:latest
+        environment: 
+            - MONGO_DATA_DIR=/data/db
+            - MONGO_LOG_DIR=/dev/null
+        volumes:
+            - ./data/db:/data/db
+        ports:
+            - 27017:27017
